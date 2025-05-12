@@ -1,53 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaTimes, FaCheck } from 'react-icons/fa';
 import { useResumeContext } from '../../context/ResumeContext';
+import ModernTemplate from './ModernTemplate';
+import ClassicTemplate from './ClassicTemplate';
 
 const TemplateSelectionModal = ({ isOpen, onClose }) => {
   const { resumeData, changeTemplate } = useResumeContext();
   const { selectedTemplate } = resumeData;
   const [selectedColor, setSelectedColor] = useState('emerald');
+  const previewRef = useRef(null);
+  
+  // Scale factor for the preview (makes it smaller to fit in the sidebar)
+  const [scale, setScale] = useState(0.4);
+  
+  // Resize the preview when window size changes
+  useEffect(() => {
+    if (isOpen && previewRef.current) {
+      const calculateScale = () => {
+        const previewWidth = previewRef.current.offsetWidth;
+        const containerWidth = previewRef.current.parentElement.offsetWidth;
+        // Calculate scale, but don't let it get too small
+        const newScale = Math.max(0.3, Math.min(0.5, (containerWidth - 40) / previewWidth));
+        setScale(newScale);
+      };
+      
+      calculateScale();
+      window.addEventListener('resize', calculateScale);
+      
+      return () => {
+        window.removeEventListener('resize', calculateScale);
+      };
+    }
+  }, [isOpen, selectedTemplate]);
   
   const templates = [
     {
       id: 'modern',
       name: 'Modern',
-      image: '/templates/modern-template.png', // You'll need to add these images
       recommended: true
     },
     {
       id: 'classic',
       name: 'Classic',
-      image: '/templates/classic-template.png',
       recommended: true
     },
     {
       id: 'minimal',
       name: 'Minimal',
-      image: '/templates/minimal-template.png',
       recommended: false
     },
     {
       id: 'professional',
       name: 'Professional',
-      image: '/templates/professional-template.png',
       recommended: true
     },
     {
       id: 'creative',
       name: 'Creative',
-      image: '/templates/creative-template.png',
       recommended: false
     },
     {
       id: 'executive',
       name: 'Executive',
-      image: '/templates/executive-template.png',
       recommended: true
     }
   ];
-  
-  // In the real implementation, we'll only have 'modern' and 'classic' working
-  // but showing more options makes the UI look more complete
   
   const colors = [
     { id: 'gray', value: '#6B7280' },
@@ -76,6 +93,18 @@ const TemplateSelectionModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // This function renders the actual template with real data
+  const renderSelectedTemplate = () => {
+    switch(selectedTemplate) {
+      case 'modern':
+        return <ModernTemplate resumeData={resumeData} />;
+      case 'classic':
+        return <ClassicTemplate resumeData={resumeData} />;
+      default:
+        return <ModernTemplate resumeData={resumeData} />;
+    }
+  };
+
   if (!isOpen) return null;
   
   return (
@@ -95,15 +124,27 @@ const TemplateSelectionModal = ({ isOpen, onClose }) => {
         {/* Modal Content */}
         <div className="flex flex-1 overflow-hidden">
           {/* Template Preview */}
-          <div className="w-1/3 bg-gray-100 p-6 border-r overflow-y-auto">
-            <div className="max-w-xs mx-auto bg-white shadow-lg p-4 rounded">
-              {/* This would be a dynamic preview of the selected template */}
-              <div className="aspect-[1/1.4] bg-gray-50 flex items-center justify-center">
-                <img 
-                  src={templates.find(t => t.id === selectedTemplate)?.image || '/templates/modern-template.png'} 
-                  alt="Template preview" 
-                  className="max-h-full object-contain"
-                />
+          <div className="w-1/3 bg-gray-100 p-6 border-r overflow-hidden">
+            <div className="mb-4">
+              <h3 className="font-medium text-gray-700 mb-2">Preview</h3>
+            </div>
+            <div className="flex justify-center">
+              <div 
+                className="origin-top bg-white shadow-lg rounded-lg overflow-hidden"
+                style={{ 
+                  transform: `scale(${scale})`, 
+                  transformOrigin: 'top center',
+                  width: '21cm',  // A4 width
+                  height: '29.7cm', // A4 height
+                  maxHeight: '80vh'
+                }}
+              >
+                <div 
+                  ref={previewRef} 
+                  className="w-full"
+                >
+                  {renderSelectedTemplate()}
+                </div>
               </div>
             </div>
             
@@ -127,36 +168,62 @@ const TemplateSelectionModal = ({ isOpen, onClose }) => {
           {/* Template Gallery */}
           <div className="w-2/3 p-6 overflow-y-auto">
             <div className="grid grid-cols-2 gap-6">
-              {templates.map(template => (
-                <div key={template.id} className="relative">
-                  <div 
-                    className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg ${selectedTemplate === template.id ? 'ring-4 ring-blue-500' : ''}`}
-                    onClick={() => handleSelectTemplate(template.id)}
-                  >
-                    <div className="aspect-[3/4] relative">
-                      <img 
-                        src={template.image}
-                        alt={`${template.name} template`}
-                        className="w-full h-full object-cover"
-                      />
-                      
-                      {/* Checkmark for selected template */}
-                      {selectedTemplate === template.id && (
-                        <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
-                          <FaCheck size={12} />
-                        </div>
-                      )}
-                      
-                      {/* Recommended badge */}
-                      {template.recommended && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-teal-500 text-white text-center text-xs py-1 font-medium">
-                          RECOMMENDED
-                        </div>
-                      )}
+              {templates.map(template => {
+                // For templates we haven't implemented, use screenshots
+                const useScreenshot = template.id !== 'modern' && template.id !== 'classic';
+                
+                return (
+                  <div key={template.id} className="relative">
+                    <div 
+                      className={`border rounded-lg overflow-hidden cursor-pointer transition-all hover:shadow-lg ${selectedTemplate === template.id ? 'ring-4 ring-blue-500' : ''}`}
+                      onClick={() => handleSelectTemplate(template.id)}
+                    >
+                      <div className="aspect-[3/4] relative bg-white">
+                        {useScreenshot ? (
+                          // For non-implemented templates, show a placeholder/screenshot
+                          <img 
+                            src={`/templates/${template.id}-template.png`}
+                            alt={`${template.name} template`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // If image fails to load, show a fallback
+                              e.target.src = '/templates/placeholder.png';
+                            }}
+                          />
+                        ) : (
+                          // For implemented templates, show a scaled-down rendered version
+                          <div className="w-full h-full overflow-hidden" style={{ transform: 'scale(0.38)', transformOrigin: 'top left' }}>
+                            <div className="w-full" style={{ width: '21cm' }}>
+                              {template.id === 'modern' ? (
+                                <ModernTemplate resumeData={resumeData} />
+                              ) : (
+                                <ClassicTemplate resumeData={resumeData} />
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Checkmark for selected template */}
+                        {selectedTemplate === template.id && (
+                          <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full p-1">
+                            <FaCheck size={12} />
+                          </div>
+                        )}
+                        
+                        {/* Recommended badge */}
+                        {template.recommended && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-teal-500 text-white text-center text-xs py-1 font-medium">
+                            RECOMMENDED
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-2 text-center bg-white">
+                        <h3 className="font-medium">{template.name}</h3>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
