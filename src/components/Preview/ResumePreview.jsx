@@ -31,7 +31,14 @@ const ResumePreview = () => {
         </div>
         
         <div className="overflow-y-auto p-6 bg-gray-100 min-h-[800px]" id="resume-preview">
-          <div className="max-w-[21cm] mx-auto shadow-lg">
+          <div 
+            className="resume-container mx-auto bg-white" 
+            style={{
+              width: '210mm',
+              minHeight: '297mm',
+              maxWidth: '100%'
+            }}
+          >
             {selectedTemplate === 'modern' ? (
               <ModernTemplate resumeData={resumeData} />
             ) : (

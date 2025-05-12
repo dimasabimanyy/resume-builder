@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useResumeContext } from '../../context/ResumeContext';
 import { exportToPDF } from '../../utils/pdfExport';
 import { FaFileDownload, FaTrash } from 'react-icons/fa';
 
 const Header = () => {
   const { resumeData, resetData } = useResumeContext();
+  const [isExporting, setIsExporting] = useState(false);
   
-  const handleExportPDF = () => {
-    exportToPDF('resume-preview', `${resumeData.personal.name || 'Resume'}.pdf`);
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      await exportToPDF('resume-preview', `${resumeData.personal.name || 'Resume'}.pdf`);
+    } catch (error) {
+      console.error('PDF Export Error:', error);
+      alert('There was a problem generating your PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
   };
   
   return (
@@ -20,6 +29,7 @@ const Header = () => {
         <button 
           onClick={resetData}
           className="flex items-center gap-2 btn-secondary"
+          disabled={isExporting}
         >
           <FaTrash size={14} />
           <span>Reset</span>
@@ -27,9 +37,10 @@ const Header = () => {
         <button 
           onClick={handleExportPDF}
           className="flex items-center gap-2 btn-success"
+          disabled={isExporting}
         >
           <FaFileDownload size={16} />
-          <span>Export PDF</span>
+          <span>{isExporting ? 'Exporting...' : 'Export PDF'}</span>
         </button>
       </div>
     </header>

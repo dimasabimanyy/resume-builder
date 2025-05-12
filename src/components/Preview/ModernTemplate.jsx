@@ -1,74 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useResumeContext } from '../../context/ResumeContext';
+import ModernTemplate from './ModernTemplate';
+import ClassicTemplate from './ClassicTemplate';
+import { FaEye, FaPalette } from 'react-icons/fa';
+import TemplateSelectionModal from './TemplateSelectionModal';
 
-const ModernTemplate = ({ resumeData }) => {
-  const { personal, experience, education, skills } = resumeData;
+const ResumePreview = () => {
+  const { resumeData } = useResumeContext();
+  const { selectedTemplate } = resumeData;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   
   return (
-    <div className="bg-white p-8 shadow-md">
-      <div className="mb-8 pb-6 border-b-2 border-gray-300">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{personal.name || 'Your Name'}</h1>
-        <div className="flex flex-wrap gap-3 mt-2 text-gray-600 text-sm">
-          {personal.email && <span className="flex items-center gap-1"><span className="font-medium">Email:</span> {personal.email}</span>}
-          {personal.phone && <span className="flex items-center gap-1"><span className="font-medium">Phone:</span> {personal.phone}</span>}
-          {personal.location && <span className="flex items-center gap-1"><span className="font-medium">Location:</span> {personal.location}</span>}
+    <>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <FaEye className="text-gray-600" />
+            <h2 className="font-medium text-gray-700">Resume Preview</h2>
+          </div>
+          <button 
+            onClick={openModal}
+            className="flex items-center gap-2 text-sm btn-secondary"
+          >
+            <FaPalette size={14} />
+            <span>Change Template</span>
+          </button>
         </div>
-        {personal.summary && <p className="mt-4 text-gray-700 leading-relaxed">{personal.summary}</p>}
+        
+        <div className="overflow-y-auto p-6 bg-gray-100 min-h-[800px]" id="resume-preview">
+          {/* This div will be the target for PDF export */}
+          <div className="resume-container mx-auto bg-white w-[210mm] min-h-[297mm]">
+            {selectedTemplate === 'modern' ? (
+              <ModernTemplate resumeData={resumeData} />
+            ) : (
+              <ClassicTemplate resumeData={resumeData} />
+            )}
+          </div>
+        </div>
       </div>
       
-      {experience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 pb-1 border-b border-gray-200">Professional Experience</h2>
-          <div className="space-y-5">
-            {experience.map((exp) => (
-              <div key={exp.id} className="mb-4">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-1">
-                  <h3 className="font-bold text-lg text-gray-800">{exp.position || 'Position'}</h3>
-                  <span className="text-gray-600 text-sm bg-blue-50 px-2 py-0.5 rounded">
-                    {exp.startDate}{exp.startDate && exp.endDate && ' - '}{exp.endDate}
-                  </span>
-                </div>
-                <p className="text-blue-600 font-medium">{exp.company || 'Company'}</p>
-                {exp.description && <p className="mt-2 text-gray-700 text-sm leading-relaxed">{exp.description}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {education.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 pb-1 border-b border-gray-200">Education</h2>
-          <div className="space-y-5">
-            {education.map((edu) => (
-              <div key={edu.id} className="mb-4">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-1">
-                  <h3 className="font-bold text-lg text-gray-800">{edu.degree || 'Degree'}</h3>
-                  <span className="text-gray-600 text-sm bg-blue-50 px-2 py-0.5 rounded">
-                    {edu.startDate}{edu.startDate && edu.endDate && ' - '}{edu.endDate}
-                  </span>
-                </div>
-                <p className="text-blue-600 font-medium">{edu.institution || 'Institution'}</p>
-                {edu.description && <p className="mt-2 text-gray-700 text-sm leading-relaxed">{edu.description}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {skills.length > 0 && (
-        <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4 pb-1 border-b border-gray-200">Skills</h2>
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill, index) => (
-              <span key={index} className="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-sm">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      <TemplateSelectionModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+      />
+    </>
   );
 };
 
-export default ModernTemplate;
+export default ResumePreview;

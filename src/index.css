@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   background-color: #f3f4f6;
 }
 
@@ -11,28 +11,51 @@ body {
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200;
   }
-  
+
   .btn-secondary {
     @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded shadow border border-gray-300 transition duration-200;
   }
-  
+
   .btn-success {
     @apply bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded shadow transition duration-200;
   }
-  
+
   .btn-danger {
     @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded shadow transition duration-200;
   }
-  
+
   .input-field {
     @apply w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500 focus:outline-none transition duration-200;
   }
-  
+
   .form-label {
     @apply block text-sm font-medium text-gray-700 mb-1;
   }
-  
+
   .form-section {
     @apply p-5 bg-white rounded-lg shadow-sm border border-gray-200;
   }
+}
+
+/* Add these to ensure the PDF generation works correctly */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .resume-container {
+    width: 210mm;
+    height: auto;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Ensure the PDF preview container maintains A4 proportions */
+.resume-container {
+  width: 100%;
+  max-width: 210mm;
+  background-color: white;
 }

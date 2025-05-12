@@ -132,13 +132,17 @@ export const ResumeProvider = ({ children }) => {
   };
 
   // Change template
-  const changeTemplate = (template) => {
-    setResumeData((prev) => ({
+// In your ResumeContext.jsx
+const changeTemplate = (template) => {
+  // Simply update the template without complex operations
+  setResumeData(prev => {
+    // Create a new object to ensure state change is detected
+    return {
       ...prev,
-      selectedTemplate: template,
-    }));
-  };
-
+      selectedTemplate: template
+    };
+  });
+};
   // Reset all data
   const resetData = () => {
     setResumeData(initialData);
