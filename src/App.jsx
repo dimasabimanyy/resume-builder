@@ -1,21 +1,23 @@
-import React from 'react';
-import { ResumeProvider } from './context/ResumeContext';
-import Header from './components/Layout/Header';
-import MainContainer from './components/Layout/MainContainer';
+// src/App.jsx
+import React from "react";
+import { ResumeProvider } from "./context/ResumeContext";
+import Header from "./components/Layout/Header";
+import MainContainer from "./components/Layout/MainContainer";
+import Footer from "./components/Layout/Footer";
+import { ToastProvider } from "./context/ToastContext";
 
 function App() {
   return (
     <ResumeProvider>
-      <div className="min-h-screen bg-gray-100">
-        <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+      <ToastProvider>
+        <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50 flex flex-col">
           <Header />
-          <MainContainer />
-          
-          <footer className="mt-10 text-center text-gray-500 text-sm py-6 border-t border-gray-200">
-            <p>© 2025 Resume Builder Online | Build professional resumes in minutes</p>
-          </footer>
+          <main className="flex-1">
+            <MainContainer />
+          </main>
+          <Footer />
         </div>
-      </div>
+      </ToastProvider>
     </ResumeProvider>
   );
 }

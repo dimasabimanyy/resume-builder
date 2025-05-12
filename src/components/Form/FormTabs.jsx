@@ -1,10 +1,6 @@
+// src/components/Form/FormTabs.jsx
 import React from 'react';
-import { 
-  FaUser, 
-  FaBriefcase, 
-  FaGraduationCap, 
-  FaTools 
-} from 'react-icons/fa';
+import { FaUser, FaBriefcase, FaGraduationCap, FaTools } from 'react-icons/fa';
 
 const FormTabs = ({ activeTab, setActiveTab }) => {
   const tabs = [
@@ -15,17 +11,17 @@ const FormTabs = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <div className="bg-white rounded-t-lg border border-gray-200 overflow-hidden">
-      <nav className="flex flex-wrap">
+    <div className="bg-white rounded-t-lg border border-neutral-200 overflow-hidden">
+      <nav className="flex">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`
-              flex items-center gap-2 px-4 py-3 text-sm font-medium flex-1 transition-colors duration-200
+              flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium flex-1 transition-all duration-200
               ${activeTab === tab.id 
-                ? 'text-blue-600 border-b-2 border-blue-500 bg-blue-50' 
-                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 border-b-2 border-transparent'}
+                ? 'text-primary-600 border-b-2 border-primary-500 bg-primary-50' 
+                : 'text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 border-b-2 border-transparent'}
             `}
           >
             {tab.icon}
