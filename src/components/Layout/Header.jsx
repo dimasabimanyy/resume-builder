@@ -1,4 +1,4 @@
-// src/components/Layout/Header.jsx
+// src/components/Layout/Header.jsx (updated)
 import React, { useState } from 'react';
 import Logo from './Logo';
 import { useResumeContext } from '../../context/ResumeContext';
@@ -23,21 +23,23 @@ const Header = () => {
   };
   
   const handleReset = () => {
-    if (showResetConfirm) {
-      resetData();
-      setShowResetConfirm(false);
-    } else {
-      setShowResetConfirm(true);
-      // Auto-hide after 3 seconds
-      setTimeout(() => setShowResetConfirm(false), 3000);
-    }
+    setShowResetConfirm(true);
+  };
+  
+  const confirmReset = () => {
+    resetData();
+    setShowResetConfirm(false);
+  };
+  
+  const cancelReset = () => {
+    setShowResetConfirm(false);
   };
   
   return (
     <header className="bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
-          <Logo />
+          {Logo ? <Logo /> : <h1 className="text-2xl font-bold">Resume Builder</h1>}
           
           <div className="flex items-center space-x-4">
             {/* GitHub button - can link to your project */}
@@ -51,27 +53,14 @@ const Header = () => {
               <FaGithub size={20} />
             </a>
             
-            <div className="relative">
-              <button 
-                onClick={handleReset}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-                  showResetConfirm 
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                }`}
-                disabled={isExporting}
-              >
-                <FaTrash size={14} />
-                <span>{showResetConfirm ? 'Confirm Reset' : 'Reset'}</span>
-              </button>
-              
-              {showResetConfirm && (
-                <div className="absolute bottom-full mb-2 w-48 p-2 bg-neutral-800 text-white text-xs rounded shadow-lg animate-fade-in">
-                  This will delete all your data!
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-neutral-800"></div>
-                </div>
-              )}
-            </div>
+            <button 
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 rounded-md bg-neutral-100 text-neutral-700 hover:bg-neutral-200 transition-colors"
+              disabled={isExporting}
+            >
+              <FaTrash size={14} />
+              <span>Reset</span>
+            </button>
             
             <button 
               onClick={handleExportPDF}
@@ -84,6 +73,32 @@ const Header = () => {
           </div>
         </div>
       </div>
+      
+      {/* Reset Confirmation Modal */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Reset Resume</h3>
+            <p className="text-gray-600 mb-6">
+              This will delete all your resume data. This action cannot be undone. Are you sure you want to continue?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelReset}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmReset}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Reset All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
