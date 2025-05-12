@@ -1,10 +1,25 @@
+// src/components/Preview/ClassicTemplate.jsx
 import React from 'react';
+import { FaLinkedin, FaGithub, FaGlobe, FaExternalLinkAlt } from 'react-icons/fa';
 
 const ClassicTemplate = ({ resumeData }) => {
-  const { personal, experience, education, skills } = resumeData;
+  const { personal, experience, education, skills, projects, certificates, languages } = resumeData;
+  
+  // Helper to check if a section has content
+  const hasContent = (section) => {
+    if (!section) return false;
+    if (Array.isArray(section)) return section.length > 0;
+    if (typeof section === 'object') return Object.values(section).some(val => val && val.trim !== '');
+    return false;
+  };
+  
+  // Helper to check if the online profiles exist
+  const hasOnlineProfiles = () => {
+    return personal.linkedin || personal.github || personal.website;
+  };
   
   return (
-    <div className="p-8">
+    <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
       {/* Header - Classic style with centered text */}
       <div className="text-center mb-6 pb-4 border-b-2 border-gray-300">
         <h1 className="text-2xl font-serif uppercase tracking-wide text-gray-900">
@@ -18,11 +33,32 @@ const ClassicTemplate = ({ resumeData }) => {
           )}
           {personal.location && <p>{personal.location}</p>}
         </div>
+        
+        {/* Online Profiles */}
+        {hasOnlineProfiles() && (
+          <div className="flex justify-center gap-4 mt-2">
+            {personal.linkedin && (
+              <a href={personal.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm">
+                <FaLinkedin /> LinkedIn
+              </a>
+            )}
+            {personal.github && (
+              <a href={personal.github} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-gray-900 flex items-center gap-1 text-sm">
+                <FaGithub /> GitHub
+              </a>
+            )}
+            {personal.website && (
+              <a href={personal.website} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-800 flex items-center gap-1 text-sm">
+                <FaGlobe /> Portfolio
+              </a>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Professional Summary */}
       {personal.summary && (
-        <div className="mb-6">
+        <div className="mb-5">
           <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
             Professional Summary
           </h2>
@@ -31,13 +67,13 @@ const ClassicTemplate = ({ resumeData }) => {
       )}
       
       {/* Experience */}
-      {experience.length > 0 && (
-        <div className="mb-6">
+      {hasContent(experience) && (
+        <div className="mb-5">
           <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
             Professional Experience
           </h2>
           {experience.map((exp, index) => (
-            <div key={index} className="mb-4">
+            <div key={exp.id || index} className="mb-4">
               <div className="flex justify-between items-baseline">
                 <h3 className="font-semibold text-gray-800">{exp.company || 'Company'}</h3>
                 <span className="text-gray-600 text-sm">
@@ -51,14 +87,44 @@ const ClassicTemplate = ({ resumeData }) => {
         </div>
       )}
       
+      {/* Projects Section (New) */}
+      {hasContent(projects) && (
+        <div className="mb-5">
+          <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
+            Projects
+          </h2>
+          {projects.map((project, index) => (
+            <div key={project.id || index} className="mb-4">
+              <div className="flex justify-between items-baseline">
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  {project.title || 'Project'}
+                  {project.link && (
+                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
+                      <FaExternalLinkAlt size={14} />
+                    </a>
+                  )}
+                </h3>
+                <span className="text-gray-600 text-sm">
+                  {project.startDate}{project.startDate && project.endDate && ' - '}{project.endDate}
+                </span>
+              </div>
+              {project.technologies && (
+                <p className="italic text-gray-700 mb-1">{project.technologies}</p>
+              )}
+              {project.description && <p className="text-gray-700 text-sm">{project.description}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+      
       {/* Education */}
-      {education.length > 0 && (
-        <div className="mb-6">
+      {hasContent(education) && (
+        <div className="mb-5">
           <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
             Education
           </h2>
           {education.map((edu, index) => (
-            <div key={index} className="mb-4">
+            <div key={edu.id || index} className="mb-4">
               <div className="flex justify-between items-baseline">
                 <h3 className="font-semibold text-gray-800">{edu.institution || 'Institution'}</h3>
                 <span className="text-gray-600 text-sm">
@@ -72,8 +138,51 @@ const ClassicTemplate = ({ resumeData }) => {
         </div>
       )}
       
+      {/* Certificates Section (New) */}
+      {hasContent(certificates) && (
+        <div className="mb-5">
+          <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
+            Certificates & Courses
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            {certificates.map((cert, index) => (
+              <div key={cert.id || index}>
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  {cert.name || 'Certificate'}
+                  {cert.link && (
+                    <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
+                      <FaExternalLinkAlt size={14} />
+                    </a>
+                  )}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {cert.issuer}{cert.date && `, ${cert.date}`}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Languages Section (New) */}
+      {hasContent(languages) && (
+        <div className="mb-5">
+          <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
+            Languages
+          </h2>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {languages.map((lang, index) => (
+              <div key={lang.id || index} className="text-gray-700">
+                <span className="font-medium">{lang.name}</span>
+                <span className="text-gray-500 italic ml-1">({lang.proficiency})</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Skills */}
-      {skills.length > 0 && (
+      {hasContent(skills) && (
         <div>
           <h2 className="text-base font-serif uppercase tracking-wider text-gray-900 border-b border-gray-300 pb-1 mb-3">
             Skills
