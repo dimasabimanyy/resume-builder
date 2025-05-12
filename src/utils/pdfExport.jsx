@@ -14,13 +14,6 @@ export const exportToPDF = async (elementId, filename) => {
     loadingDiv.style.zIndex = '9999';
     document.body.appendChild(loadingDiv);
     
-    // Use window.print() as a simple alternative
-    const printWindow = window.open('', '_blank');
-    
-    if (!printWindow) {
-      throw new Error('Unable to open print window. Please check your popup blocker settings.');
-    }
-    
     // Get the resume container
     const element = document.getElementById(elementId);
     const resumeContainer = element.querySelector('.resume-container');
@@ -29,114 +22,81 @@ export const exportToPDF = async (elementId, filename) => {
       throw new Error('Resume container not found');
     }
     
-    // Clone the resume container
-    const clonedContent = resumeContainer.cloneNode(true);
+    // Import libraries
+    const jspdfModule = await import('jspdf');
+    const html2canvasModule = await import('html2canvas');
     
-    // Create print document
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${filename}</title>
-          <style>
-            @page {
-              size: A4;
-              margin: 0;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-              background-color: white;
-            }
-            .resume-container {
-              width: 210mm;
-              min-height: 297mm;
-              padding: 0;
-              margin: 0;
-              background-color: white;
-              box-shadow: none;
-            }
-            /* This is the key style that hides the buttons when printing */
-            @media print {
-              .no-print {
-                display: none !important;
-              }
-            }
-            /* Only show buttons on screen */
-            .print-controls {
-              position: fixed;
-              top: 20px;
-              right: 20px;
-              display: flex;
-              gap: 10px;
-              z-index: 1000;
-              background-color: rgba(255, 255, 255, 0.9);
-              padding: 10px;
-              border-radius: 8px;
-              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-            .print-btn {
-              background-color: #4f46e5;
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 4px;
-              cursor: pointer;
-              font-family: system-ui, -apple-system, sans-serif;
-              font-size: 14px;
-            }
-            .print-btn:hover {
-              background-color: #4338ca;
-            }
-            .close-btn {
-              background-color: #6b7280;
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 4px;
-              cursor: pointer;
-              font-family: system-ui, -apple-system, sans-serif;
-              font-size: 14px;
-            }
-            .close-btn:hover {
-              background-color: #4b5563;
-            }
-          </style>
-          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        </head>
-        <body>
-          <div class="resume-container">${clonedContent.innerHTML}</div>
-          <div class="print-controls no-print">
-            <button onclick="window.print()" class="print-btn">
-              Print / Save as PDF
-            </button>
-            <button onclick="window.close()" class="close-btn">
-              Close
-            </button>
-          </div>
-          <script>
-            // Prompt to print automatically after loading
-            window.addEventListener('load', function() {
-              // Small delay to ensure styles are loaded
-              setTimeout(function() {
-                // Uncomment the next line if you want automatic print dialog
-                // window.print();
-              }, 1000);
-            });
-          </script>
-        </body>
-      </html>
-    `);
+    // Create instances
+    const jsPDF = jspdfModule.jsPDF;
+    const html2canvas = html2canvasModule.default;
     
-    printWindow.document.close();
+    // Create a clone of the resume container with clean styling
+    const clonedContainer = resumeContainer.cloneNode(true);
+    clonedContainer.style.width = '210mm';
+    clonedContainer.style.backgroundColor = 'white';
+    clonedContainer.style.position = 'absolute';
+    clonedContainer.style.left = '-9999px';
+    clonedContainer.style.boxShadow = 'none';
+    document.body.appendChild(clonedContainer);
     
-    // Remove loading indicator
-    document.body.removeChild(loadingDiv);
+    try {
+      // Create canvas
+      const canvas = await html2canvas(clonedContainer, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: 'white'
+      });
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Convert canvas to image
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      
+      // A4 dimensions
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      // Calculate scaled dimensions
+      const ratio = canvas.height / canvas.width;
+      const width = pdfWidth;
+      const height = width * ratio;
+      
+      // Add image to PDF
+      pdf.addImage(imgData, 'JPEG', 0, 0, width, height);
+      
+      // Handle multiple pages if needed
+      if (height > pdfHeight) {
+        let remainingHeight = height - pdfHeight;
+        let position = -pdfHeight;
+        
+        while (remainingHeight > 0) {
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, width, height);
+          position -= pdfHeight;
+          remainingHeight -= pdfHeight;
+        }
+      }
+      
+      // Save the PDF
+      pdf.save(filename);
+      
+    } finally {
+      // Clean up the cloned container
+      if (document.body.contains(clonedContainer)) {
+        document.body.removeChild(clonedContainer);
+      }
+    }
     
   } catch (error) {
-    console.error('Error preparing document for print:', error);
-    alert(`Error preparing document for print: ${error.message}`);
-    
+    console.error('Error generating PDF:', error);
+    alert(`Error generating PDF: ${error.message}`);
+  } finally {
     // Remove loading indicator
     const loadingElement = document.body.querySelector('div[style*="position: fixed"]');
     if (loadingElement) {
