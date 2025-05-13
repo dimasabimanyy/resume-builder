@@ -1,4 +1,4 @@
-// src/components/Preview/ModernTemplate.jsx
+// src/components/Preview/ModernTemplate.jsx (updated)
 import React from 'react';
 import { FaLinkedin, FaGithub, FaGlobe, FaExternalLinkAlt } from 'react-icons/fa';
 
@@ -18,6 +18,12 @@ const ModernTemplate = ({ resumeData }) => {
     return personal.linkedin || personal.github || personal.website;
   };
   
+  // Helper to format URLs properly
+  const formatUrl = (url) => {
+    if (!url) return '';
+    return url.startsWith('http') ? url : `https://${url}`;
+  };
+  
   return (
     <div className="bg-white p-8">
       {/* Header Section */}
@@ -32,22 +38,43 @@ const ModernTemplate = ({ resumeData }) => {
           {personal.location && <span>{personal.location}</span>}
         </div>
         
-        {/* Online Profiles */}
+        {/* Online Profiles - Fixed alignment */}
         {hasOnlineProfiles() && (
           <div className="flex flex-wrap gap-4 mt-3">
             {personal.linkedin && (
-              <a href={personal.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-sm">
-                <FaLinkedin /> LinkedIn
+              <a 
+                href={formatUrl(personal.linkedin)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-600 hover:text-blue-800 text-sm"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <FaLinkedin style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> 
+                <span style={{ verticalAlign: 'middle' }}>LinkedIn</span>
               </a>
             )}
             {personal.github && (
-              <a href={personal.github} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:text-gray-900 flex items-center gap-1 text-sm">
-                <FaGithub /> GitHub
+              <a 
+                href={formatUrl(personal.github)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-700 hover:text-gray-900 text-sm"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <FaGithub style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> 
+                <span style={{ verticalAlign: 'middle' }}>GitHub</span>
               </a>
             )}
             {personal.website && (
-              <a href={personal.website} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-800 flex items-center gap-1 text-sm">
-                <FaGlobe /> Portfolio
+              <a 
+                href={formatUrl(personal.website)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-green-600 hover:text-green-800 text-sm"
+                style={{ display: 'flex', alignItems: 'center' }}
+              >
+                <FaGlobe style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> 
+                <span style={{ verticalAlign: 'middle' }}>Portfolio</span>
               </a>
             )}
           </div>
@@ -79,6 +106,43 @@ const ModernTemplate = ({ resumeData }) => {
         </div>
       )}
       
+      {/* Projects Section */}
+      {hasContent(projects) && (
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-3 pb-1 border-b border-gray-200">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((project, index) => (
+              <div key={project.id || index} className="mb-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-1">
+                  <h3 className="font-bold text-gray-800" style={{ display: 'flex', alignItems: 'center' }}>
+                    {project.title || 'Project Title'}
+                    {project.link && (
+                      <a 
+                        href={formatUrl(project.link)} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ marginLeft: '8px', color: '#3b82f6' }}
+                      >
+                        <FaExternalLinkAlt size={14} style={{ verticalAlign: 'middle' }} />
+                      </a>
+                    )}
+                  </h3>
+                  <span className="text-gray-600 text-sm">
+                    {project.startDate}{project.startDate && project.endDate && ' - '}{project.endDate}
+                  </span>
+                </div>
+                {project.technologies && (
+                  <p className="text-blue-600 font-medium">{project.technologies}</p>
+                )}
+                {project.description && <p className="mt-2 text-gray-700 text-sm">{project.description}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Education Section */}
       {hasContent(education) && (
         <div className="mb-6">
@@ -102,39 +166,7 @@ const ModernTemplate = ({ resumeData }) => {
         </div>
       )}
       
-      {/* Projects Section (New) */}
-      {hasContent(projects) && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-3 pb-1 border-b border-gray-200">
-            Projects
-          </h2>
-          <div className="space-y-4">
-            {projects.map((project, index) => (
-              <div key={project.id || index} className="mb-4">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-1">
-                  <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                    {project.title || 'Project Title'}
-                    {project.link && (
-                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
-                        <FaExternalLinkAlt size={14} />
-                      </a>
-                    )}
-                  </h3>
-                  <span className="text-gray-600 text-sm">
-                    {project.startDate}{project.startDate && project.endDate && ' - '}{project.endDate}
-                  </span>
-                </div>
-                {project.technologies && (
-                  <p className="text-blue-600 font-medium">{project.technologies}</p>
-                )}
-                {project.description && <p className="mt-2 text-gray-700 text-sm">{project.description}</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Certificates Section (New) */}
+      {/* Certificates Section */}
       {hasContent(certificates) && (
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-3 pb-1 border-b border-gray-200">
@@ -143,11 +175,16 @@ const ModernTemplate = ({ resumeData }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {certificates.map((cert, index) => (
               <div key={cert.id || index} className="mb-2">
-                <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                <h3 className="font-bold text-gray-800" style={{ display: 'flex', alignItems: 'center' }}>
                   {cert.name || 'Certificate Name'}
                   {cert.link && (
-                    <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
-                      <FaExternalLinkAlt size={14} />
+                    <a 
+                      href={formatUrl(cert.link)} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      style={{ marginLeft: '8px', color: '#3b82f6' }}
+                    >
+                      <FaExternalLinkAlt size={14} style={{ verticalAlign: 'middle' }} />
                     </a>
                   )}
                 </h3>
@@ -161,7 +198,7 @@ const ModernTemplate = ({ resumeData }) => {
         </div>
       )}
       
-      {/* Languages Section (New) */}
+      {/* Languages Section - Fixed padding */}
       {hasContent(languages) && (
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-3 pb-1 border-b border-gray-200">
@@ -169,7 +206,15 @@ const ModernTemplate = ({ resumeData }) => {
           </h2>
           <div className="flex flex-wrap gap-4">
             {languages.map((lang, index) => (
-              <div key={lang.id || index} className="bg-gray-100 px-3 py-2 rounded-lg">
+              <div 
+                key={lang.id || index} 
+                className="bg-gray-100 rounded-lg"
+                style={{ 
+                  display: 'inline-block', 
+                  padding: '8px 12px',
+                  margin: '0 4px 8px 0'
+                }}
+              >
                 <span className="font-medium">{lang.name}</span>
                 <span className="text-gray-500 text-sm ml-2">({lang.proficiency})</span>
               </div>
@@ -178,7 +223,7 @@ const ModernTemplate = ({ resumeData }) => {
         </div>
       )}
       
-      {/* Skills Section */}
+      {/* Skills Section - Fixed padding */}
       {hasContent(skills) && (
         <div>
           <h2 className="text-xl font-bold text-gray-800 mb-3 pb-1 border-b border-gray-200">
@@ -186,7 +231,19 @@ const ModernTemplate = ({ resumeData }) => {
           </h2>
           <div className="flex flex-wrap gap-2">
             {skills.map((skill, index) => (
-              <span key={index} className="bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-sm">
+              <span 
+                key={index} 
+                style={{ 
+                  display: 'inline-block',
+                  backgroundColor: '#ebf5ff', 
+                  color: '#3b82f6',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: '9999px',
+                  padding: '4px 12px',
+                  fontSize: '0.875rem',
+                  margin: '0 4px 8px 0'
+                }}
+              >
                 {skill}
               </span>
             ))}
